@@ -54,6 +54,7 @@ parser.add_argument('--flag'       , default = None       , help ='WP to test')
 parser.add_argument('--era'        , type=str, default = '', choices=["BtoF", "GtoH"], help ='era to perform tnp fits for')
 parser.add_argument('--inputMC'    , type=str, default = '', help = "MC input file which contains 3d histograms")
 parser.add_argument('--inputData'  , type=str, default = '', help = "Data input file which contains 3d histograms")
+parser.add_argument('--inputBkg'   , type=str, default = '', help = "Background input file which contains 3d histograms")
 parser.add_argument('--outdir'     , type=str, default=None,
                     help="name of the output folder (if not passed, a default one is used, which has the time stamp in it)")
 parser.add_argument('--useTrackerMuons', action='store_true'  , help = 'Measuring efficiencies specific for tracker muons (different tunings needed')
@@ -84,7 +85,7 @@ if typeflag == 'tracking':
     #binning_pt  = [15., 25.,35.,45.,55.,65.,80.]
     #massbins, massmin, massmax = 100, 40, 140
     #binning_pt  = [55., 65.]
-    binning_pt  = [24., 35., 45., 55., 65.]  # [24., 65.]
+    binning_pt  = [10., 15., 24., 35., 45., 55., 65.]  # [24., 65.]
     #massbins, massmin, massmax = 100, 50, 150
     massbins, massmin, massmax = 80, 50, 130
     binningDef = {
@@ -99,7 +100,7 @@ elif typeflag == 'reco':
     if args.useTrackerMuons:
         binning_pt  = [24., 26., 30., 34., 38., 42., 46., 50., 55., 65.]
     else:
-        binning_pt  = [24., 26., 30., 34., 38., 42., 46., 50., 55., 60., 65.]
+        binning_pt  = [10., 15., 20., 24., 26., 30., 34., 38., 42., 46., 50., 55., 60., 65.]
     #binning_pt  = [24., 26., 28., 30., 32., 34., 36., 38., 40., 42., 44., 47., 50., 55., 60., 65.]
     binningDef = {
         'eta' : {'var' : 'eta', 'type': 'float', 'bins': binning_eta},
@@ -107,7 +108,8 @@ elif typeflag == 'reco':
     }
 
 elif typeflag == 'veto':
-    binning_pt = [(15. + 5.*i) for i in range(11)]
+    binning_pt  = [10., 15., 20., 24., 26., 28., 30., 32., 34., 36., 38., 40., 42., 44., 47., 50., 55., 60., 65.]
+    #binning_pt = [(15. + 5.*i) for i in range(11)]
     binningDef = {
         'eta' : {'var' : 'eta', 'type': 'float', 'bins': binning_eta},
         'pt'  : {'var' : 'pt' , 'type': 'float', 'bins': binning_pt }
@@ -151,6 +153,11 @@ if typeflag == 'tracking':
     tnpParAltSigFit = [
         "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]",'nP[3,0.01,5]',"sigmaP_2[1.5,0.5,6.0]",
         "meanF[-0.0,-12.0,12.0]","sigmaF[2,0.7,12.0]","alphaF[2.0,1.2,3.5]",'nF[3,0.01,5]',"sigmaF_2[2.0,0.5,6.0]",
+    ]
+    
+    tnpParAltBkgFit = [
+        "meanP[-0.0,-5.0,5.0]", "sigmaP[0.5,0.1,5.0]", "expalphaP[0.,-5.,5.]",
+        "meanF[-0.0,-5.0,5.0]", "sigmaF[0.5,0.02,3.0]",
     ]
 
     # for pt >= 55 and tracking (se also note above)
@@ -219,6 +226,11 @@ elif typeflag == 'reco':
         "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]",'nP[3,0.01,5]',"sigmaP_2[1.5,0.5,6.0]",
         "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,5.0]","alphaF[2.0,1.2,3.5]",'nF[3,0.1,5]',"sigmaF_2[2.0,0.5,6.0]",
     ]
+    
+    tnpParAltBkgFit = [
+        "meanP[-0.0,-5.0,5.0]", "sigmaP[0.5,0.1,3.0]", "expalphaP[0.,-5.,5.]",
+        "meanF[-0.0,-3.0,3.0]", "sigmaF[0.5,0.01,2.0]",
+    ]
 
     tnpParNomFit.extend(bkgParFit)
     tnpParAltSigFit.extend(bkgParFit)
@@ -261,6 +273,11 @@ else:
         "meanF[-0.0,-5.0,5.0]","sigmaF[0.5,0.1,5.0]",
     ]
     
+    tnpParAltBkgFit = [
+        "meanP[-0.0,-5.0,5.0]","sigmaP[0.5,0.1,5.0]", "expalphaP[0.,-5.,5.]",
+        "meanF[-0.0,-5.0,5.0]","sigmaF[0.5,0.1,5.0]",
+    ]
+    
     tnpParAltSigFit = [
         "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]",'nP[3,0.01,5]',"sigmaP_2[1.5,0.5,6.0]",
         "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,15.0]","alphaF[2.0,1.2,3.5]",'nF[3,0.01,5]',"sigmaF_2[2.0,0.5,6.0]",
@@ -277,13 +294,6 @@ if any(x in typeflag for x in flagsWithFSR):
     fsrGauss = ["fsrMeanF[70.0,65.0,80.0]", "fsrSigmaF[1.0,1.2,5.0]"]
     tnpParAltSigFit.extend(fsrGauss)
 
-# for now this is not used, the nominal background model has been moved to exponential already, this might become a Bernstein polynominal or something
-tnpParAltBkgFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[0.5,0.1,5.0]",
-    "meanF[-0.0,-10.0,10.0]","sigmaF[0.5,0.1,5.0]",
-    "expalphaP[0.,-5.,5.]",
-    "expalphaF[0.,-5.,5.]",
-    ]
 
 if args.outdir:
     baseOutDir = '{o}/efficiencies_{era}/'.format(o=args.outdir, era=args.era)
@@ -309,6 +319,14 @@ samples_dy = tnpSample(mcName,
                        args.inputMC,
                        f"{outputDirectory}/{mcName}_{args.flag}.root",
                        True)
+if args.inputBkg or args.altBkg:
+    bkg_name = f"mu_mcBkg_{eraMC}"
+    samples_bkg = tnpSample(bkg_name,
+                            args.inputBkg,
+                            f"{outputDirectory}/{bkg_name}_{args.flag}.root",
+                            True)
+else:
+    samples_bkg=None
 #samples_data.printConfig()
 #samples_dy.printConfig()
 
@@ -331,11 +349,12 @@ if args.createHists:
 samplesDef = {
     'data'   : samples_data,
     'mcNom'  : samples_dy,
-    'mcAltSig'  : None, 
+    'mcAltSig'  : None,
+    'mcBkg'  : samples_bkg,
     #'tagSel' : None,
 }
 
-#samplesDef["data"].printConfig()
+samplesDef["data"].printConfig()
 
 ## done making it more configurable
 ## ===========================================================================================
@@ -395,7 +414,7 @@ if args.createHists:
 ####################################################################
 ##### Actual Fitter
 ####################################################################
-sampleToFit = samplesDef['data']
+sampleToFit = samplesDef['data'] 
 if sampleToFit is None:
     print('[tnpEGM_fitter, prelim checks]: sample (data or MC) not available... check your settings')
     sys.exit(1)
@@ -409,6 +428,7 @@ for s in samplesDef.keys():
     sample =  samplesDef[s]
     if sample is None: continue
     setattr( sample, 'mcRef'     , sampleMC )
+    if args.altBkg: setattr( sample, 'bkgRef'    , samplesDef['mcBkg'] )
     setattr( sample, 'nominalFit', '%s/%s_%s_nominalFit.root' % ( outputDirectory , sample.getName(), args.flag ) )
     setattr( sample, 'altSigFit' , '%s/%s_%s_altSigFit.root'  % ( outputDirectory , sample.getName(), args.flag ) )
     setattr( sample, 'altBkgFit' , '%s/%s_%s_altBkgFit.root'  % ( outputDirectory , sample.getName(), args.flag ) )
@@ -429,12 +449,14 @@ if args.altBkg :
 plottingDir = '%s/plots/%s/%s' % (outputDirectory,sampleToFit.getName(),fitType)
 createPlotDirAndCopyPhp(plottingDir)
     
-if  args.doFit:
+if args.doFit:
     print(">>> running fits")
     #print('sampleToFit.dump()', sampleToFit.dump())
     # can't use all probes for cases with isolation, since the failing probe sample has the FSR and a second bump at low mass
-    useAllTemplateForFail = True if typeflag not in flagsWithFSR else False # use all probes to build MC template for failing probes when fitting data nominal
-    maxFailIntegralToUseAllProbe = 300 if typeflag not in ["tracking"] else -1 # use all probes for the failing template only when stat is very small, otherwise sometimes the fit doesn't work well
+    #useAllTemplateForFail = True if typeflag not in flagsWithFSR else False # use all probes to build MC template for failing probes when fitting data nominal
+    #maxFailIntegralToUseAllProbe = 300 if typeflag not in ["tracking"] else -1 # use all probes for the failing template only when stat is very small, otherwise sometimes the fit doesn't work well
+    useAllTemplateForFail = False
+    maxFailIntegralToUseAllProbe = -1
     altSignalFail = True if typeflag in ["tracking", "reco", "veto"] else False # use Gaussian as resolution function for altSig model
     modelFSR = True if typeflag in flagsWithFSR else False # add Gaussian to model low mass bump from FSR, in altSig fit
     def parallel_fit(ib): ## parallel
@@ -460,8 +482,8 @@ if  args.doFit:
             elif not args.mcSig:
                 # do this only for data
                 if args.altBkg:
-                    fitUtils.histFitterAltBkg(sampleToFit, tnpBins['bins'][ib], tnpParAltBkgFit, massbins, massmin, massmax,
-                                              useAllTemplateForFail, maxFailIntegralToUseAllProbe, bkgShapes=bkgShapes)
+                    fitUtils.histFitterAltBkgTemplate(sampleToFit, tnpBins['bins'][ib], tnpParAltBkgFit, massbins, massmin, massmax,
+                                                      useAllTemplateForFail, maxFailIntegralToUseAllProbe, constrainPars=[], bkgShapes=[], isBBfail=True)
                 else:
                     fitUtils.histFitterNominal(sampleToFit, tnpBins['bins'][ib], tnpParNomFit, massbins, massmin, massmax,
                                                useAllTemplateForFail, maxFailIntegralToUseAllProbe, constrainPars=parConstraints, bkgShapes=bkgShapes)
@@ -469,10 +491,10 @@ if  args.doFit:
             #     # nominal fit in MC still with analytc form but no background
             #     fitUtils.histFitterAltSig(sampleToFit, tnpBins['bins'][ib], tnpParAltSigFit, massbins, massmin, massmax,
             #                               altSignalFail=altSignalFail, modelFSR=modelFSR, zeroBackground=True)
-                    
+
     pool = Pool() ## parallel
     pool.map(parallel_fit, range(len(tnpBins['bins']))) ## parallel
-
+    #parallel_fit(0)
     args.doPlot = True
 
 ####################################################################
@@ -550,6 +572,7 @@ if args.sumUp:
     #print('this is the dump of sampleToFit:')
     #sampleToFit.dump()
     #pprint(vars(sampleToFit.mcRef))
+
     #print('done with dump')
     info = {
         #'data'        : sampleToFit.getOutputPath(),
@@ -559,7 +582,7 @@ if args.sumUp:
         'mcNominal'   : sampleToFit.mcRef.getOutputPath(),
         'mcNominal_fit': sampleToFit.mcRef.nominalFit,
         'mcAltSig'    : sampleToFit.mcRef.altSigFit,
-        'mcAltBkg'    : sampleToFit.mcRef.altBkgFit,
+        'mcAltBkg'    : sampleToFit.mcRef.altBkgFit, # not used
         'tagSel'      : None
         }
 
@@ -572,13 +595,14 @@ if args.sumUp:
     #print(info)
 
     effFileName = outputDirectory+'/allEfficiencies.txt'
+
     # security check, if the code crashes the temporary files are still present, let's remove them before executing parallel_sumUp
     if any ("_tmpTMP_" in f for f in os.listdir(outputDirectory)):
         os.system(f"rm {effFileName}_tmpTMP_*")
             
     #fOut = open( effFileName,'w')
     def parallel_sumUp(_bin):
-        effis = tnpRoot.getAllEffi( info, _bin, outputDirectory, saveCanvas=True)
+        effis = tnpRoot.getAllEffi(info, _bin, outputDirectory, saveCanvas=True)
         #print("effis =",effis)
         #print('this is _bin', _bin)        
         ### formatting assuming 2D bining -- to be fixed
@@ -594,23 +618,27 @@ if args.sumUp:
             fOut.write( astr )
             astr = '### var2 : %s\n' % v2Range[1]
             fOut.write( astr )
-            exp = '{v0:8s}\t{v1:8s}\t{v2:8s}\t{v3:8s}\t{edv:10s}\t{ede:10s}\t{emcv:10s}\t{emce:10s}\t{edalts:15s}\t{edaltse:15s}\t{emcalt:15s}\t{emcalte:15s}\t{edaltb:15s}\t{etagsel:10s}\n'.format(
+            #exp = '{v0:8s}\t{v1:8s}\t{v2:8s}\t{v3:8s}\t{edaltb:10s}\t{edaltbe:10s}\t{emcv:10s}\t{emce:10s}\n'.format( 
+            exp = '{v0:8s}\t{v1:8s}\t{v2:8s}\t{v3:8s}\t{edv:10s}\t{ede:10s}\t{emcv:10s}\t{emce:10s}\t{edalts:15s}\t{edaltse:15s}\t{edaltb:15s}\t{edaltbe:15s}\t{emcalt:15s}\t{emcalte:15s}\t{etagsel:10s}\n'.format(
                 v0='var1min', v1='var1max', v2='var2min', v3='var2max',
                 edv='eff data', ede='err data',
                 emcv='eff mc', emce='err mc',
                 edalts='eff data altS', edaltse='err data altS',
-                emcalt='eff mc alt', emcalte='err mc alt', edaltb='eff data altB', etagsel='eff tag sel')
+                edaltb='eff data altB', edaltbe='err data altB',
+                emcalt='eff mc alt', emcalte='err mc alt',
+                etagsel='eff tag sel'
+                )
             #print(exp)
             fOut.write(exp)
 
-        astr =  '%-+8.3f\t%-+8.3f\t%-+8.3f\t%-+8.3f\t%-10.6f\t%-10.6f\t%-10.6f\t%-10.6f\t%-15.6f\t%-15.6f\t%-15.6f\t%-15.6f\t%-15.6f\t%-10.5f' % (
+        astr =  '%-+8.3f\t%-+8.3f\t%-+8.3f\t%-+8.3f\t%-10.6f\t%-10.6f\t%-10.6f\t%-10.6f\t%-15.6f\t%-15.6f\t%-15.6f\t%-15.6f\t%-15.6f\t%-15.6f\t%-10.5f' % (
             float(v1Range[0]), float(v1Range[2]),
             float(v2Range[0]), float(v2Range[2]),
             effis['dataNominal'][0],effis['dataNominal'][1],
             effis['mcNominal'  ][0],effis['mcNominal'  ][1],
             effis['dataAltSig' ][0],effis['dataAltSig' ][1],
+            effis['dataAltBkg' ][0], effis['dataAltBkg' ][1],
             effis['mcAltSig' ][0], effis['mcAltSig' ][1],
-            effis['dataAltBkg' ][0],
             effis['tagSel'][0],
             )
         #print(astr)
